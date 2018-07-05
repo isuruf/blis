@@ -578,12 +578,27 @@ libblis: check-env $(MK_LIBS)
 
 $(LIBBLIS_A_PATH): $(MK_BLIS_OBJS)
 ifeq ($(ENABLE_VERBOSE),yes)
+ifeq ($(ARG_MAX_HACK),yes)
+	$(file > $@.in,$^)
+	$(AR) $(ARFLAGS) $@ @$@.in
+	$(RM_F) $@.in
+	$(RANLIB) $@
+else
 	$(AR) $(ARFLAGS) $@ $?
 	$(RANLIB) $@
+endif
+else # ifeq ($(ENABLE_VERBOSE),no)
+ifeq ($(ARG_MAX_HACK),yes)
+	@echo "Archiving $@"
+	@$(file > $@.in,$^)
+	@$(AR) $(ARFLAGS) $@ @$@.in
+	@$(RM_F) $@.in
+	@$(RANLIB) $@
 else
 	@echo "Archiving $@"
 	@$(AR) $(ARFLAGS) $@ $?
 	@$(RANLIB) $@
+endif
 endif
 
 
@@ -591,10 +606,23 @@ endif
 
 $(LIBBLIS_SO_PATH): $(MK_BLIS_OBJS)
 ifeq ($(ENABLE_VERBOSE),yes)
+ifeq ($(ARG_MAX_HACK),yes)
+	$(file > $@.in,$^)
+	$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $@ @$@.in
+	$(RM_F) $@.in
+else
 	$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $@ $?
-else 
+endif
+else # ifeq ($(ENABLE_VERBOSE),no)
+ifeq ($(ARG_MAX_HACK),yes)
+	@echo "Dynamically linking $@"
+	@$(file > $@.in,$^)
+	@$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $@ @$@.in
+	@$(RM_F) $@.in
+else
 	@echo "Dynamically linking $@"
 	@$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $@ $?
+endif
 endif
 
 
@@ -873,6 +901,7 @@ showconfig: check-env
 	@echo "enable CBLAS API?      $(MK_ENABLE_CBLAS)"
 	@echo "build static library?  $(MK_ENABLE_STATIC)"
 	@echo "build shared library?  $(MK_ENABLE_SHARED)"
+	@echo "ARG_MAX hack enabled?  $(ARG_MAX_HACK)"
 
 
 # --- Clean rules ---
