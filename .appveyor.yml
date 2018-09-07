@@ -24,7 +24,7 @@ build_script:
 - ps: Push-AppveyorArtifact C:\blis.zip
 
 test_script:
-- bash -lc "source activate && cd /c/projects/blis && make AR=llvm-ar check V=1"
+- bash -lc "source activate && cd /c/projects/blis && make AR=llvm-ar check V=1 BUILD_FLAGS="
 - cat out.cblat3
 
 # Enable this to be able to login to the build worker. You can use the
