@@ -612,8 +612,10 @@ $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CXXLANGFLAGS,$(c))
 # --- C Preprocessor flags ---
 
 # Enable clock_gettime() in time.h.
+ifeq ($(IS_WIN),0)
 CPPROCFLAGS := -D_POSIX_C_SOURCE=200112L
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CPPROCFLAGS,$(c))))
+endif
 
 
 # --- Threading flags ---
