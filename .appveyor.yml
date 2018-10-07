@@ -1,23 +1,25 @@
 environment:
   matrix:
-    - LIB_TYPE: shared
-      CONFIG: x86_64
-      THREADING: openmp
-      LIBPTHREAD:
     - LIB_TYPE: static
       CONFIG: auto
       THREADING: no
-      LIBPTHREAD:
+
+    - LIB_TYPE: shared
+      CONFIG: x86_64
+      THREADING: openmp
+      EXTRA_PKGS: openmp
+
     - LIB_TYPE: static
       CONFIG: intel64
       THREADING: pthreads
+      EXTRA_PKGS: pthreads-win32
 
 install:
 - set "CONDA_INSTALL_LOCN=C:\\Miniconda36-x64"
 - call %CONDA_INSTALL_LOCN%\Scripts\activate.bat
 - conda update --yes --quiet conda
 - conda config --add channels conda-forge
-- conda install --yes clangdev posix m2-make openmp
+- conda install --yes clangdev posix m2-make %EXTRA_PKGS%
 - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
 - set "LIB=%CONDA_INSTALL_LOCN%\Library\lib;%LIB%"
 - set "CPATH=%CONDA_INSTALL_LOCN%\Library\include;%CPATH%"
@@ -25,6 +27,8 @@ install:
 build_script:
 - if [%LIB_TYPE%]==[shared] set "CONFIGURE_OPTS=%CONFIGURE_OPTS% --enable-shared --disable-static"
 - if [%LIB_TYPE%]==[static] set "CONFIGURE_OPTS=%CONFIGURE_OPTS% --disable-shared --enable-static"
+- if NOT [%THREADING%]==[pthreads] set "LIBPTHREAD="
+- if [%THREADING%]==[pthreads] set "LIBPTHREAD=pthreads"
 - set CC=clang
 - set RANLIB=echo
 - set AR=llvm-ar
