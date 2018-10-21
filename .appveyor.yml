@@ -1,21 +1,23 @@
 environment:
   matrix:
-    - LIB_TYPE: shared
-      CONFIG: x86_64
-      CONFIGURE_OPTS: --enable-threading=openmp
     - LIB_TYPE: static
       CONFIG: intel64
-      CONFIGURE_OPTS: --enable-threading=pthreads
+      THREADING: pthreads
+    - LIB_TYPE: shared
+      CONFIG: x86_64
+      THREADING: openmp
     - LIB_TYPE: static
       CONFIG: auto
-      CONFIGURE_OPTS: --disable-threading
+      THREADING: no
 
 install:
 - set "CONDA_INSTALL_LOCN=C:\\Miniconda36-x64"
 - call %CONDA_INSTALL_LOCN%\Scripts\activate.bat
 - conda update --yes --quiet conda
 - conda config --add channels conda-forge
-- conda install --yes clangdev openmp posix m2-make
+- if [%THREADING%]==[pthreads] set "EXTRA_CONDA_PKGS=%EXTRA_CONDA_PKGS% pthreads-win32"
+- if [%THREADING%]==[openmp] set "EXTRA_CONDA_PKGS=%EXTRA_CONDA_PKGS% openmp"
+- conda install --yes clangdev posix m2-make %EXTRA_CONDA_PKGS%
 - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
 - set "LIB=%CONDA_INSTALL_LOCN%\Library\lib;%LIB%"
 - set "CPATH=%CONDA_INSTALL_LOCN%\Library\include;%CPATH%"
@@ -27,10 +29,10 @@ build_script:
 - set RANLIB=echo
 - set AR=llvm-ar
 - set AS=llvm-as
-- set LIBPTHREAD=
+- if [%THREADING%]==[pthreads] set "LIBPTHREAD=-lpthread"
 - set "PATH=%PATH%;C:\projects\blis\lib\%CONFIG%"
 - set "CFLAGS=-Wno-macro-redefined"
-- bash -lc "source activate && cd /c/projects/blis && ./configure %CONFIGURE_OPTS% --enable-cblas --enable-arg-max-hack --prefix=/c/blis %CONFIG%"
+- bash -lc "source activate && cd /c/projects/blis && ./configure %CONFIGURE_OPTS% --enable-threading=%THREADING% --enable-cblas --enable-arg-max-hack --prefix=/c/blis %CONFIG%"
 - bash -lc "source activate && cd /c/projects/blis && make -j4 V=1"
 - bash -lc "source activate && cd /c/projects/blis && make install"
 - ps: Compress-Archive -Path C:\blis -DestinationPath C:\blis.zip
