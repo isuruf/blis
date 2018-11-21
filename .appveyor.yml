@@ -46,9 +46,14 @@ test_script:
 - if [%LIB_TYPE%]==[shared] set "TEST_TARGET=checkblis-fast"
 - if [%LIB_TYPE%]==[static] set "TEST_TARGET=check"
 - bash -lc "cd /c/projects/blis && mingw32-make %TEST_TARGET% -j4 V=1"
+- git clone https://github.com/Reference-LAPACK/lapack
+- cd lapack
+- mkdir build && cd build
+- cmake -G "MinGW Makefiles" -DBLAS_LIBRARIES=C:\blis\lib\libblis.dll.a -DBUILD_TESTING=yes ..
+- mingw32-make -j4
 
 # Enable this to be able to login to the build worker. You can use the
 # `remmina` program in Ubuntu, use the login information that the line below
 # prints into the log.
-#on_finish:
-#- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+on_finish:
+- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
