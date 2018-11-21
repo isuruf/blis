@@ -49,8 +49,10 @@ test_script:
 - git clone https://github.com/Reference-LAPACK/lapack
 - cd lapack
 - mkdir build && cd build
-- cmake -G "MinGW Makefiles" -DBLAS_LIBRARIES=C:\blis\lib\libblis.dll.a -DBUILD_TESTING=yes ..
+- rm "C:/Program Files/Git/usr/bin/sh.exe"
+- bash -lc "cmake -G 'MinGW Makefiles' -DBLAS_LIBRARIES=/c/blis/lib/libblis.dll.a -DBUILD_TESTING=yes .."
 - mingw32-make -j4
+- ctest
 
 # Enable this to be able to login to the build worker. You can use the
 # `remmina` program in Ubuntu, use the login information that the line below
